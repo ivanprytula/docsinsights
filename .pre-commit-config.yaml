@@ -1,0 +1,77 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-toml
+      - id: check-yaml
+        args:
+          - --unsafe
+      - id: end-of-file-fixer
+        exclude: |
+            (?x)^(
+                frontend/src/client/.*|
+                backend/app/email-templates/.*
+            )$
+      - id: trailing-whitespace
+        exclude: ^frontend/src/client/.*
+  - repo: https://github.com/crate-ci/typos
+    rev: 8a48f81b6c64dcfea44b3633223084c4be58ac5f # frozen: v1.49.0
+    hooks:
+      - id: typos
+        args: [--force-exclude]
+  - repo: local
+    hooks:
+      - id: local-biome-check
+        name: biome check
+        entry: npm run lint
+        language: system
+        types: [text]
+        files: ^frontend/
+
+      - id: local-ruff-check
+        name: ruff check
+        entry: uv run ruff check --force-exclude --fix --exit-non-zero-on-fix
+        require_serial: true
+        language: unsupported
+        types: [python]
+
+      - id: local-ruff-format
+        name: ruff format
+        entry: uv run ruff format --force-exclude --exit-non-zero-on-format
+        require_serial: true
+        language: unsupported
+        types: [python]
+
+      - id: local-ty
+        name: ty check
+        entry: uv run ty check backend/app
+        require_serial: true
+        language: unsupported
+        pass_filenames: false
+
+      - id: local-pyrefly
+        name: pyrefly check
+        entry: bash -c 'cd backend && uv run python -m pyrefly check'
+        require_serial: true
+        language: unsupported
+        pass_filenames: false
+        stages: [manual]
+
+      - id: generate-frontend-sdk
+        name: Generate Frontend SDK
+        entry: just generate-client
+        pass_filenames: false
+        language: unsupported
+        files: ^backend/app/.*\.py$|^backend/pyproject\.toml$|^uv\.lock$|^frontend/openapi-ts\.config\.ts$
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.3
+    hooks:
+      - id: actionlint
