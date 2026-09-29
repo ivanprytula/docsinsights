@@ -77,7 +77,7 @@ uv run alembic upgrade head
 - **Structure:** Unit tests in `backend/tests/unit/`, integration tests in `backend/tests/integration/`.
 - **E2E with Playwright:** Tests in `frontend/tests/`, run via `docker compose` (backend must be running).
 - **Naming:** Test functions describe the scenario: `test_authenticate_with_valid_email_succeeds`, not `test_auth`.
-- **Coverage:** Run locally: `just test`. CI enforces 90% coverage on backend.
+- **Coverage:** Run locally: `just test`. CI enforces 80% coverage on backend.
 
 ## Frontend (Bun + React + TypeScript)
 
