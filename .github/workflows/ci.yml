@@ -105,6 +105,7 @@ jobs:
       PROJECT_NAME: docsinsights
       FIRST_SUPERUSER: admin@example.com
       FIRST_SUPERUSER_PASSWORD: changeme
+      EMAILS_FROM_EMAIL: info@example.com
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
