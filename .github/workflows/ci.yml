@@ -58,6 +58,12 @@ jobs:
         ports:
           - 1025:1025
           - 8025:8025
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost/test
+      SECRET_KEY: test-secret-key-for-ci
+      PROJECT_NAME: docsinsights
+      FIRST_SUPERUSER: admin@example.com
+      FIRST_SUPERUSER_PASSWORD: changeme
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -72,16 +78,8 @@ jobs:
         run: cd backend && uv sync
       - name: Migrate database
         run: cd backend && uv run alembic upgrade head
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost/test
-          SECRET_KEY: test-secret-key-for-ci
-          PROJECT_NAME: docsinsights
-          FIRST_SUPERUSER: admin@example.com
-          FIRST_SUPERUSER_PASSWORD: changeme
       - name: Run tests with coverage
         run: cd backend && FASTAPI_ENV=development uv run pytest tests/ --cov=app --cov-report=term-missing --cov-report=html --cov-fail-under=80
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost/test
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -119,7 +117,7 @@ jobs:
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           version: "latest-known"
-      - uses: taiki-e/install-action@74dc3166e16a005928e9ef53b1f47b352e2986bb # v2.46.0
+      - uses: taiki-e/install-action@899b013517f9e7774591216672bf75a46bb9a481 # v2.9.4
         with:
           tool: just
       - name: Install dependencies
