@@ -133,6 +133,7 @@ jobs:
           docker compose down -v --remove-orphans
           docker compose run --rm backend uv run alembic upgrade head
           docker compose up -d --wait backend
+          docker compose exec -T backend uv run python app/initial_data.py
       - name: Run Playwright tests
         run: docker compose run --rm playwright bunx playwright test --fail-on-flaky-tests --trace=retain-on-failure --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
       - name: Cleanup
