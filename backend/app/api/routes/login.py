@@ -1,15 +1,27 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
+import jwt
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from jwt.exceptions import InvalidTokenError
+from pydantic import ValidationError
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
-from app.models import Message, NewPassword, Token, UserPublic, UserUpdate
+from app.models import (
+    Message,
+    NewPassword,
+    RefreshTokenRequest,
+    Token,
+    TokenPayload,
+    User,
+    UserPublic,
+    UserUpdate,
+)
 from app.utils import (
     generate_password_reset_token,
     generate_reset_password_email,
@@ -35,10 +47,55 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_token_expires = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(
             user.id, expires_delta=access_token_expires
+        ),
+        refresh_token=security.create_refresh_token(
+            user.id, expires_delta=refresh_token_expires
+        ),
+    )
+
+
+@router.post("/login/refresh-token")
+def refresh_access_token(session: SessionDep, body: RefreshTokenRequest) -> Token:
+    """
+    Get a new access token using a refresh token
+    """
+    try:
+        payload = jwt.decode(
+            body.refresh_token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
+        token_data = TokenPayload(**payload)
+    except InvalidTokenError, ValidationError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired refresh token",
+        )
+
+    if token_data.type != "refresh":
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid token type",
+        )
+
+    user = session.get(User, token_data.sub)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_token_expires = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+
+    return Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        ),
+        refresh_token=security.create_refresh_token(
+            user.id, expires_delta=refresh_token_expires
+        ),
     )
 
 

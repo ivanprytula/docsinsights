@@ -22,6 +22,11 @@ fileConfig(config.config_file_name)
 from app.models import SQLModel  # noqa
 from app.core.config import settings # noqa
 
+# Per-domain models must be imported explicitly so Alembic autogenerate
+# discovers their tables (see ADR-0003 — per-package models, no shared models.py).
+# Note: Document table is deferred to Phase 2 (ingestion domain)
+# from app.ingestion.models import Document  # noqa
+
 target_metadata = SQLModel.metadata
 
 # other values from the config, defined by the needs of env.py,

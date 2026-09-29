@@ -189,3 +189,95 @@ def test_login_with_argon2_password_keeps_hash(client: TestClient, db: Session) 
 
     assert user.hashed_password == original_hash
     assert user.hashed_password.startswith("$argon2")
+
+
+def test_login_includes_refresh_token(client: TestClient) -> None:
+    login_data = {
+        "username": settings.FIRST_SUPERUSER,
+        "password": settings.FIRST_SUPERUSER_PASSWORD,
+    }
+    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    tokens = r.json()
+    assert r.status_code == 200
+    assert "access_token" in tokens
+    assert "refresh_token" in tokens
+    assert tokens["refresh_token"]
+
+
+def test_refresh_token_success(client: TestClient) -> None:
+    login_data = {
+        "username": settings.FIRST_SUPERUSER,
+        "password": settings.FIRST_SUPERUSER_PASSWORD,
+    }
+    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    tokens = r.json()
+    refresh_token = tokens["refresh_token"]
+
+    r = client.post(
+        f"{settings.API_V1_STR}/login/refresh-token",
+        json={"refresh_token": refresh_token},
+    )
+    result = r.json()
+    assert r.status_code == 200
+    assert "access_token" in result
+    assert result["access_token"]
+
+
+def test_refresh_token_with_access_token_rejected(client: TestClient) -> None:
+    login_data = {
+        "username": settings.FIRST_SUPERUSER,
+        "password": settings.FIRST_SUPERUSER_PASSWORD,
+    }
+    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    tokens = r.json()
+    access_token = tokens["access_token"]
+
+    r = client.post(
+        f"{settings.API_V1_STR}/login/refresh-token",
+        json={"refresh_token": access_token},
+    )
+    assert r.status_code == 400
+    assert "detail" in r.json()
+    assert "Invalid token type" in r.json()["detail"]
+
+
+def test_refresh_token_invalid(client: TestClient) -> None:
+    r = client.post(
+        f"{settings.API_V1_STR}/login/refresh-token",
+        json={"refresh_token": "invalid.token.here"},
+    )
+    assert r.status_code == 400
+    assert "detail" in r.json()
+    assert "Invalid or expired refresh token" in r.json()["detail"]
+
+
+def test_refresh_token_for_inactive_user(client: TestClient, db: Session) -> None:
+    email = random_email()
+    password = random_lower_string()
+
+    user_create = UserCreate(
+        email=email,
+        full_name="Test User",
+        password=password,
+        is_active=True,
+        is_superuser=False,
+    )
+    user = create_user(session=db, user_create=user_create)
+
+    login_data = {"username": email, "password": password}
+    r = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
+    tokens = r.json()
+    refresh_token = tokens["refresh_token"]
+
+    # Deactivate the user
+    user.is_active = False
+    db.add(user)
+    db.commit()
+
+    r = client.post(
+        f"{settings.API_V1_STR}/login/refresh-token",
+        json={"refresh_token": refresh_token},
+    )
+    assert r.status_code == 400
+    assert "detail" in r.json()
+    assert "Inactive user" in r.json()["detail"]

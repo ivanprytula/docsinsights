@@ -91,6 +91,16 @@ export type PrivateUserCreate = {
 };
 
 /**
+ * RefreshTokenRequest
+ */
+export type RefreshTokenRequest = {
+    /**
+     * Refresh Token
+     */
+    refresh_token: string;
+};
+
+/**
  * Token
  */
 export type Token = {
@@ -98,6 +108,10 @@ export type Token = {
      * Access Token
      */
     access_token: string;
+    /**
+     * Refresh Token
+     */
+    refresh_token?: string | null;
     /**
      * Token Type
      */
@@ -138,6 +152,7 @@ export type UserCreate = {
      * Full Name
      */
     full_name?: string | null;
+    role?: UserRole;
     /**
      * Password
      */
@@ -164,6 +179,7 @@ export type UserPublic = {
      * Full Name
      */
     full_name?: string | null;
+    role?: UserRole;
     /**
      * Id
      */
@@ -191,6 +207,11 @@ export type UserRegister = {
      */
     full_name?: string | null;
 };
+
+/**
+ * UserRole
+ */
+export type UserRole = 'user' | 'admin';
 
 /**
  * UserUpdate
@@ -298,6 +319,31 @@ export type loginLoginAccessTokenResponses = {
 };
 
 export type loginLoginAccessTokenResponse = loginLoginAccessTokenResponses[keyof loginLoginAccessTokenResponses];
+
+export type loginRefreshAccessTokenData = {
+    body: RefreshTokenRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/login/refresh-token';
+};
+
+export type loginRefreshAccessTokenErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type loginRefreshAccessTokenError = loginRefreshAccessTokenErrors[keyof loginRefreshAccessTokenErrors];
+
+export type loginRefreshAccessTokenResponses = {
+    /**
+     * Successful Response
+     */
+    200: Token;
+};
+
+export type loginRefreshAccessTokenResponse = loginRefreshAccessTokenResponses[keyof loginRefreshAccessTokenResponses];
 
 export type loginTestTokenData = {
     body?: never;

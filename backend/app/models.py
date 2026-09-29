@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, datetime
+from enum import StrEnum
 
 from pydantic import EmailStr
 from sqlalchemy import Column, DateTime
@@ -10,12 +11,18 @@ def get_datetime_utc() -> datetime:
     return datetime.now(UTC)
 
 
+class UserRole(StrEnum):
+    user = "user"
+    admin = "admin"
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    role: UserRole = Field(default=UserRole.user)
 
 
 # Properties to receive via API on creation
@@ -77,14 +84,20 @@ class Message(SQLModel):
 # JSON payload containing access token
 class Token(SQLModel):
     access_token: str
+    refresh_token: str | None = None
     token_type: str = "bearer"
 
 
 # Contents of JWT token
 class TokenPayload(SQLModel):
     sub: str | None = None
+    type: str = "access"
 
 
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+
+class RefreshTokenRequest(SQLModel):
+    refresh_token: str
