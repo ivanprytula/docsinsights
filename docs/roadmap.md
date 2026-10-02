@@ -61,10 +61,34 @@ refresh-token rotation) rather than custom security.
 
 ---
 
+## Phase 2 - Document ingestion & vectorization
+
+**Tag:** Product (the vectorization half doubles as Skills-practice: RAG, pgvector).
+
+**Problem:** documents can't be searched by meaning until their text is extracted
+and turned into vectors. Search and review (Phases 3-4) need that stored first.
+
+**Decision:** PDF only, pages split into overlapping 250-word windows (page number kept for citations; bge-small truncates at 512 tokens),
+embedded on CPU with fastembed `bge-small-en-v1.5`, stored in pgvector alongside
+the chunk. Embedding happens synchronously in the upload request. The embedder
+lives in `ingestion/` so retrieval can depend on ingestion, not the reverse.
+
+**Shipped:**
+
+- `POST /documents/upload` (PDF): parse, chunk, embed, and store a document with its chunks in one transaction
+- `GET /documents/`, `GET /documents/{id}`, `DELETE /documents/{id}`, owner-scoped (superuser bypass)
+- `DocumentChunk.embedding` as `vector(384)`, `NOT NULL`; pgvector extension via migration
+- Clear 422s for encrypted, unreadable, and text-less PDFs
+- Verified end to end: upload via the API stores the document, chunks, and vectors
+
+**Not shipped:** search over the vectors, ANN index, DOCX, OCR, background embedding.
+
+**ADRs:** [ADR-0002: RAG stack](./adr/0002-rag-stack-and-retrieval-design.md), [ADR-0003: Modulith seam](./adr/0003-modulith-package-seam.md), [ADR-0005: Embedder ownership and pgvector](./adr/0005-embedder-ownership-and-pgvector-storage.md)
+
+---
+
 ## Not yet started
 
-- **Phase 2 (document ingestion & vectorization)** — RAG pipeline, embedding
-  models, async job queues; no ADRs yet because no decisions have been made.
 - **Phase 3 (semantic search)** — vector similarity, ranking, filtering.
 - **Phase 4 (agentic review)** — multi-turn LLM interaction, structured output.
 - **Phase 5+ (cloud deploy, scaling)** — see README; decisions pending.

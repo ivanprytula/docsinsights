@@ -17,8 +17,15 @@ type-check-strict:
 # Start full containerized stack (db, backend, frontend, mailpit, adminer, proxy)
 up:
     docker compose up -d --wait db adminer backend mailpit proxy
-    docker compose exec -T backend uv run python -m alembic upgrade head
-    docker compose exec -T backend uv run python app/initial_data.py
+    docker compose exec -T backend python -m alembic upgrade head
+    docker compose exec -T backend python app/initial_data.py
+
+# Hybrid dev: services in containers, backend on host with hot reload (port 8000)
+dev:
+    docker compose up -d --wait db adminer mailpit
+    cd backend && uv run python -m alembic upgrade head
+    cd backend && uv run python app/initial_data.py
+    cd backend && uv run python -m uvicorn app.main:app --reload --port 8000
 
 # Stop containerized stack (keeps volumes)
 down:
@@ -37,7 +44,7 @@ test-local:
 # Run backend tests in containerized stack
 test:
     docker compose exec -T backend rm -rf htmlcov
-    docker compose exec -T -e FASTAPI_ENV=development backend uv run pytest
+    docker compose exec -T -e FASTAPI_ENV=development backend python -m pytest
 
 # Full CI-like suite: build, run, test, cleanup
 test-ci:
@@ -45,7 +52,7 @@ test-ci:
     docker compose down -v --remove-orphans
     docker compose run --rm backend uv run python -m alembic upgrade head
     docker compose up -d
-    docker compose exec -T -e FASTAPI_ENV=development backend uv run pytest
+    docker compose exec -T -e FASTAPI_ENV=development backend python -m pytest
     docker compose down -v --remove-orphans
 
 # === Code Generation & Integration ===
