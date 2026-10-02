@@ -24,8 +24,7 @@ from app.core.config import settings # noqa
 
 # Per-domain models must be imported explicitly so Alembic autogenerate
 # discovers their tables (see ADR-0003 — per-package models, no shared models.py).
-# Note: Document table is deferred to Phase 2 (ingestion domain)
-# from app.ingestion.models import Document  # noqa
+from app.ingestion.models import Document, DocumentChunk  # noqa
 
 target_metadata = SQLModel.metadata
 
