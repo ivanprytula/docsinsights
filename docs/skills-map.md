@@ -46,7 +46,7 @@ than a contrived "yes".
 
 | Facet | Status | Depth | Where |
 | --- | --- | --- | --- |
-| REST, domain-language endpoints | ✅ P1 | L1 | `backend/app/ingestion/router.py` — `POST /documents/`, `GET /documents/`, `GET /documents/{id}`, `DELETE /documents/{id}`. Owner-scoped (403 on non-owner, matching `items.py`'s pattern). `POST /documents/{id}/search` planned for Phase 2 retrieval. |
+| REST, domain-language endpoints | ✅ P1 | L1 | `app.ingestion.router` - `POST /documents/upload`, `GET /documents/`, `GET /documents/{id}`, `DELETE /documents/{id}`; `app.retrieval.router` - `POST /search` (optional `document_id`). Owner-scoped: a missing or foreign document returns 404 so ids cannot be probed (superusers can read and delete any document; search is always the caller's own). |
 | OpenAPI → generated TS client | ⏳ P1 | — | `just generate-client` ready; CI will regenerate and run `tsc -b` — API drift fails the build. Schema-first contract. |
 | GraphQL BFF | ❌ | — | Deferred. REST sufficient for phase 1; GraphQL added only if N+1 query patterns emerge. |
 
@@ -65,7 +65,7 @@ than a contrived "yes".
 | --- | --- | --- | --- |
 | Relational modeling | ✅ P1 | L1 | `backend/app/ingestion/models.py` - `Document` (owner FK, cascade-delete) and `DocumentChunk` (one row per page, FK cascade-delete, `embedding vector(384)`). |
 | Migrations | ✅ P1 | L1 | Alembic: initial schema (UUIDv7) plus `eb6f038d729c` (pgvector extension + `documentchunk.embedding`); upgrade/downgrade round-trip verified, `alembic check` clean. Per-domain model discovery wired in `alembic/env.py` (ADR-0003). |
-| Vector store | 🟡 P2 | L1 | pgvector on `documentchunk.embedding`, `NOT NULL`, dimensions read from the fastembed model registry (ADR-0005). Written on upload; not queried yet (Phase 3). No separate vector DB. |
+| Vector store | ✅ P2 | L1 | pgvector on `documentchunk.embedding`, `NOT NULL`, dimensions read from the fastembed model registry (ADR-0005). Written on upload and queried by `POST /search`. No separate vector DB. |
 | Query performance | ⏳ P3 | — | Planned: `EXPLAIN ANALYZE` on semantic search queries (vector + keyword hybrid). |
 
 ### CI/CD, containers, secrets, DNS/HTTPS
@@ -145,7 +145,7 @@ than a contrived "yes".
 | Facet | Status | Depth | Where |
 | --- | --- | --- | --- |
 | LLM as reviewer, not chatbot | ⏳ P2 | — | Structured output (Pydantic model) for agentic review. Claude grades document clarity + consistency against a rubric. |
-| RAG over document corpus | ⏳ P2 | — | Document chunks semantically searched, embedded context fed to reviewer LLM. Recall@k eval planned for golden set. |
+| RAG over document corpus | 🟡 P3 | L1 | Retrieval half works: chunk, embed, store, `POST /search` returns ranked passages with page numbers (see `docs/c4-architecture.md` walkthrough). Missing: keyword leg (hybrid), reranker, LLM answer step, Recall@k evaluation on a golden set. |
 | Embedding pipeline | 🟡 P2 | L1 | Upload -> parse PDF (pypdf, overlapping 250-word windows per page) -> embed (`ingestion/embedder.py`, fastembed bge-small, CPU) -> store, synchronously in the request (ADR-0005). No batching bounds, cache, or background worker yet. |
 | Retrieval evaluation | ⏳ P3 | — | Recall@k on labeled golden set. CI-gating once real docs exist. |
 | Cost + latency control | ⏳ P2 | — | LLM calls only on agentic review phase (once per document). Caching: identical chunks reuse cached embedding + review. |
@@ -163,7 +163,7 @@ than a contrived "yes".
 
 | Facet | Status | Depth | Where |
 | --- | --- | --- | --- |
-| pgvector | 🟡 P2 | L1 | Plain `vector(384)` column, `pgvector/pgvector:pg18` image in compose and CI. No distance queries or HNSW/IVFFlat index yet (Phase 3). |
+| pgvector | 🟡 P2 | L1 | Cosine-distance queries (`<=>`) via `app.retrieval.search`, owner-scoped in SQL; `pgvector/pgvector:pg18` image in compose and CI. Sequential scan only: no HNSW/IVFFlat index yet. |
 | **Why not Pinecone/Weaviate/Qdrant** | ❌ | — | At this corpus size (100s–1000s of documents), a dedicated vector DB is overkill. Document corpus size threshold recorded; will switch if needed. |
 
 ### Prompt / context engineering as engineering

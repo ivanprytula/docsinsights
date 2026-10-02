@@ -87,9 +87,43 @@ lives in `ingestion/` so retrieval can depend on ingestion, not the reverse.
 
 ---
 
+## Phase 3 - Semantic search
+
+**Tag:** Product. Uploaded documents are only useful if a question can find the right passage.
+
+**Problem:** after Phase 2 the vectors sit in the database but nothing reads them. A user cannot
+ask "do I need AWS?" and get the page that answers it.
+
+**Decision:** vector-only search over the caller's own chunks. The query is embedded with the
+same model as the chunks, and Postgres ranks chunks by cosine distance (pgvector). `POST`
+rather than `GET` so query text stays out of URLs and access logs. A missing or foreign
+`document_id` returns 404 (same for document read and delete) so ids cannot be probed. No
+query prefix: it changed no rankings in a check on real chunks (ADR-0005).
+
+**Shipped:**
+
+- `POST /search` with `query`, `limit` (1-20, default 5) and optional `document_id`; returns filename, page, passage and score per hit
+- Owner scoping inside the SQL query, so another user's passages never enter the result set
+- Whitespace collapsed at chunking, so returned passages are readable (pypdf can emit one word per line)
+- `GET` and `DELETE /documents/{id}` return 404 instead of 403 for documents the caller cannot see
+- Checked on real data: "aws" and a paraphrase ("do I need to know Amazon Web Services?") both rank the passage containing the AWS requirement first
+
+**Known limits (not shipped):**
+
+- No keyword leg: acronym and exact-term queries rank weakly, and the right passage can land second
+- No score threshold: scores are compressed (0.46-0.64 in the check), so only ordering is meaningful and weak matches still return
+- No vector index (sequential scan), no reranker, no LLM
+- No evaluation set: retrieval quality is judged by hand on a few documents
+- No frontend screen for upload or search; the feature is API-only
+
+**ADRs:** [ADR-0002: Search endpoint, `POST` now and `QUERY` later](./adr/0002-rag-stack-and-retrieval-design.md), [ADR-0003: Modulith seam](./adr/0003-modulith-package-seam.md), [ADR-0004: 404 for foreign documents](./adr/0004-auth-refresh-tokens-and-roles.md), [ADR-0005: Embedder ownership and pgvector](./adr/0005-embedder-ownership-and-pgvector-storage.md).
+
+**Architecture:** [C4 architecture](./c4-architecture.md) has the component view and an end-to-end walkthrough.
+
+---
+
 ## Not yet started
 
-- **Phase 3 (semantic search)** — vector similarity, ranking, filtering.
 - **Phase 4 (agentic review)** — multi-turn LLM interaction, structured output.
 - **Phase 5+ (cloud deploy, scaling)** — see README; decisions pending.
 

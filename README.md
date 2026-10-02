@@ -48,6 +48,7 @@ Backend runs in Docker automatically. See [development.md](./development.md) for
 | [development.md](./development.md) | Local dev workflow, `.env` config, Docker Compose services |
 | [deployment-docker-compose.md](./deployment-docker-compose.md) | Self-hosted deployment |
 | [docs/roadmap.md](./docs/roadmap.md) | Phase breakdown and planned work |
+| [docs/c4-architecture.md](./docs/c4-architecture.md) | C4 context, containers and backend components; RAG walkthrough; dependency rules |
 | [docs/skills-map.md](./docs/skills-map.md) | Capability coverage by domain |
 | [docs/adr/](./docs/adr/) | Architecture Decision Records |
 
