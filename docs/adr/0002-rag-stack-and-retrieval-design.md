@@ -60,7 +60,7 @@ Storage: SQLite (dev) with `documents` (id, filename, content, embeddings) and `
 - **Ingestion scope:** Add DOCX when PDF pipeline is stable and users request it. Phase 2b: add vision/handwritten via OCR.
 - **Granularity:** If citations must be more precise than "page N," add span-level grounding (sentence boundaries or LLM-extracted passages) in Phase 4.
 - **Re-ranking:** If threshold tuning shows misses (good docs filtered out), lower it; if noise (bad docs ranked high), raise it. Phase 4: switch to a domain-specific re-ranker or fine-tune cross-encoder on labeled data.
-- **Storage:** SQLite (Phase 2–3) → PostgreSQL + PGVector (Phase 4) for vector persistence at scale.
+- **Storage:** SQLite (Phase 2–3) → PostgreSQL + PGVector (Phase 4) for vector persistence at scale. *Superseded in part by [ADR-0005](./0005-embedder-ownership-and-pgvector-storage.md): pgvector from Phase 2, and the embedder lives in `ingestion/`.*
 
 ## Consequences
 
