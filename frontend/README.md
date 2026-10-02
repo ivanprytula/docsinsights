@@ -1,6 +1,8 @@
-# FastAPI Project - Frontend
+# Frontend — docsinsights
 
-The frontend is built with [Vite](https://vitejs.dev/), [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router), [Tailwind CSS](https://tailwindcss.com/), and [shadcn/ui](https://ui.shadcn.com/).
+**Updated:** 2026-09-29
+
+Tech stack: [Vite](https://vitejs.dev/), [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [TanStack Query](https://tanstack.com/query), [TanStack Router](https://tanstack.com/router), [Tailwind CSS](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/).
 
 ## Requirements
 
@@ -8,18 +10,34 @@ The frontend is built with [Vite](https://vitejs.dev/), [React](https://react.de
 
 ## Quick Start
 
-From the project root, install the dependencies and start the frontend development server:
+From project root:
+
+```bash
+just up
+```
+
+Then open <http://localhost:5173/> in your browser (Vite dev server auto-starts).
+
+To stop: `just down`
+
+## Development
+
+Install dependencies and start dev server:
 
 ```bash
 bun install
-bun run dev
+bun run --filter frontend dev
 ```
 
-Then open <http://localhost:5173/> in your browser.
+Frontend: <http://localhost:5173/>
+Backend API: <http://localhost:8000/docs> (must be running)
 
-Run `just prestart` and `cd backend && uv run fastapi dev` with PostgreSQL running in Docker Compose. See [../development.md](../development.md) for the complete setup.
+To build for production (served by FastAPI):
 
-To serve the frontend with FastAPI, run `bun run build` from the `frontend` directory and open `http://localhost:8000`.
+```bash
+bun run --filter frontend build
+# Then: http://localhost:8000
+```
 
 Check `frontend/package.json` for available commands.
 
