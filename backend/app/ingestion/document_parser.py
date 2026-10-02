@@ -1,4 +1,3 @@
-import re
 import uuid
 from typing import BinaryIO
 
@@ -36,15 +35,18 @@ def split_into_windows(
     max_words: int = MAX_CHUNK_WORDS,
     overlap_words: int = CHUNK_OVERLAP_WORDS,
 ) -> list[str]:
-    """Split text into overlapping word windows, preserving original whitespace."""
-    words = list(re.finditer(r"\S+", text))
+    """Split text into overlapping word windows, collapsing all whitespace to single spaces.
+
+    pypdf can emit a newline after every word, which makes stored passages unreadable.
+    """
+    words = text.split()
     if len(words) <= max_words:
-        return [text]
+        return [" ".join(words)]
     step = max_words - overlap_words
     windows = []
     for start in range(0, len(words), step):
-        end = min(start + max_words, len(words))  # min()
-        windows.append(text[words[start].start() : words[end - 1].end()])
+        end = min(start + max_words, len(words))
+        windows.append(" ".join(words[start:end]))
         if end == len(words):
             break
     return windows
