@@ -147,6 +147,68 @@ export type RefreshTokenRequest = {
 };
 
 /**
+ * SearchHit
+ */
+export type SearchHit = {
+    /**
+     * Chunk Id
+     */
+    chunk_id: string;
+    /**
+     * Document Id
+     */
+    document_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Page Num
+     */
+    page_num: number;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Score
+     */
+    score: number;
+};
+
+/**
+ * SearchRequest
+ */
+export type SearchRequest = {
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Document Id
+     */
+    document_id?: string | null;
+    /**
+     * Limit
+     */
+    limit?: number;
+};
+
+/**
+ * SearchResults
+ */
+export type SearchResults = {
+    /**
+     * Data
+     */
+    data: Array<SearchHit>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * Token
  */
 export type Token = {
@@ -914,6 +976,31 @@ export type documentsUploadDocumentResponses = {
 };
 
 export type documentsUploadDocumentResponse = documentsUploadDocumentResponses[keyof documentsUploadDocumentResponses];
+
+export type searchSearchDocumentsData = {
+    body: SearchRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/search';
+};
+
+export type searchSearchDocumentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type searchSearchDocumentsError = searchSearchDocumentsErrors[keyof searchSearchDocumentsErrors];
+
+export type searchSearchDocumentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SearchResults;
+};
+
+export type searchSearchDocumentsResponse = searchSearchDocumentsResponses[keyof searchSearchDocumentsResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;

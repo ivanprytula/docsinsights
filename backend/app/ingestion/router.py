@@ -1,32 +1,33 @@
 import uuid
-from functools import lru_cache
-from typing import Annotated, Any
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException, UploadFile
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentUser, EmbedderDep, SessionDep
 from app.ingestion import crud
 from app.ingestion.document_parser import (
     EncryptedDocumentError,
     UnsupportedDocumentError,
     parse_pdf,
 )
-from app.ingestion.embedder import Embedder, FastEmbedEmbedder
 from app.ingestion.models import Document, DocumentPublic, DocumentsPublic
-from app.models import Message
+from app.models import Message, User
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 MAX_UPLOAD_BYTES = 20 * 1024 * 1024
 
 
-@lru_cache
-def get_embedder() -> Embedder:
-    """One embedder per process so the model loads once."""
-    return FastEmbedEmbedder()
-
-
-EmbedderDep = Annotated[Embedder, Depends(get_embedder)]
+def _get_visible_document(
+    *, session: SessionDep, current_user: User, id: uuid.UUID
+) -> Document:
+    """Return the document, or 404 if missing or not the caller's (superusers see all)."""
+    document = crud.get_document(session=session, id=id)
+    if document is None or (
+        not current_user.is_superuser and document.owner_id != current_user.id
+    ):
+        raise HTTPException(status_code=404, detail="Document not found")
+    return document
 
 
 @router.get("/", response_model=DocumentsPublic)
@@ -45,11 +46,7 @@ def read_documents(
 @router.get("/{id}", response_model=DocumentPublic)
 def read_document(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
     """Get a document by ID."""
-    document = crud.get_document(session=session, id=id)
-    if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
-    if not current_user.is_superuser and document.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+    document = _get_visible_document(session=session, current_user=current_user, id=id)
     return document
 
 
@@ -86,10 +83,6 @@ def delete_document(
     session: SessionDep, current_user: CurrentUser, id: uuid.UUID
 ) -> Message:
     """Delete a document."""
-    document = crud.get_document(session=session, id=id)
-    if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
-    if not current_user.is_superuser and document.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
+    document = _get_visible_document(session=session, current_user=current_user, id=id)
     crud.delete_document(session=session, document=document)
     return Message(message="Document deleted successfully")

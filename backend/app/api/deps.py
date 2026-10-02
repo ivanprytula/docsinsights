@@ -11,6 +11,7 @@ from sqlmodel import Session
 from app.core import security
 from app.core.config import settings
 from app.core.db import engine
+from app.ingestion.embedder import Embedder, get_embedder
 from app.models import TokenPayload, User
 
 reusable_oauth2 = OAuth2PasswordBearer(
@@ -25,6 +26,7 @@ def get_db() -> Generator[Session]:
 
 SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
+EmbedderDep = Annotated[Embedder, Depends(get_embedder)]
 
 
 def get_current_user(session: SessionDep, token: TokenDep) -> User:

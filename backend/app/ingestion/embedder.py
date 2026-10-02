@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from functools import lru_cache
 from typing import Protocol
 
 from fastembed import TextEmbedding
@@ -44,3 +45,9 @@ class FastEmbedEmbedder:
     def embed_query(self, text: str) -> list[float]:
         """Embed a search query; bge-small v1.5 needs no instruction prefix (ADR-0005)."""
         return self.embed_documents([text])[0]
+
+
+@lru_cache
+def get_embedder() -> Embedder:
+    """One embedder per process so the model loads once."""
+    return FastEmbedEmbedder()
