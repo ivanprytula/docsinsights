@@ -137,6 +137,27 @@ export type DocumentsPublic = {
 };
 
 /**
+ * Finding
+ *
+ * One requirement's outcome; `verdict` is None when the model gave no valid verdict.
+ */
+export type Finding = {
+    /**
+     * Requirement
+     */
+    requirement: string;
+    verdict: Verdict | null;
+    /**
+     * Rationale
+     */
+    rationale: string | null;
+    /**
+     * Sources
+     */
+    sources: Array<AnswerSource>;
+};
+
+/**
  * HTTPValidationError
  */
 export type HTTPValidationError = {
@@ -200,6 +221,30 @@ export type RefreshTokenRequest = {
      * Refresh Token
      */
     refresh_token: string;
+};
+
+/**
+ * Review
+ */
+export type Review = {
+    /**
+     * Findings
+     */
+    findings: Array<Finding>;
+};
+
+/**
+ * ReviewRequest
+ */
+export type ReviewRequest = {
+    /**
+     * Requirements
+     */
+    requirements: Array<string>;
+    /**
+     * Limit
+     */
+    limit?: number;
 };
 
 /**
@@ -458,6 +503,11 @@ export type ValidationError = {
         [key: string]: unknown;
     };
 };
+
+/**
+ * Verdict
+ */
+export type Verdict = 'satisfied' | 'not_satisfied' | 'not_found';
 
 export type loginLoginAccessTokenData = {
     body: Body_login_login_access_token;
@@ -1082,6 +1132,36 @@ export type searchAnswerQuestionResponses = {
 };
 
 export type searchAnswerQuestionResponse = searchAnswerQuestionResponses[keyof searchAnswerQuestionResponses];
+
+export type reviewReviewDocumentData = {
+    body: ReviewRequest;
+    path: {
+        /**
+         * Document Id
+         */
+        document_id: string;
+    };
+    query?: never;
+    url: '/api/v1/documents/{document_id}/review';
+};
+
+export type reviewReviewDocumentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reviewReviewDocumentError = reviewReviewDocumentErrors[keyof reviewReviewDocumentErrors];
+
+export type reviewReviewDocumentResponses = {
+    /**
+     * Successful Response
+     */
+    200: Review;
+};
+
+export type reviewReviewDocumentResponse = reviewReviewDocumentResponses[keyof reviewReviewDocumentResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;

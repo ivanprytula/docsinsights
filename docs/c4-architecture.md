@@ -137,6 +137,9 @@ Mermaid flowchart, not strict C4 notation, so it renders on GitHub without plugi
 | Similarity search | `app.retrieval.search` | Cosine-distance query over the owner's chunks, joined to filenames; score is `1 - distance` |
 | Answer endpoint | `app.retrieval.router` | `POST /answer`: same search and 404 rules as `/search`, then the passages go to the answerer; returns the answer plus numbered sources matching its `[n]` citations. 503 without an API key, 502 if the model call fails |
 | Answerer | `app.retrieval.answerer` | `Answerer` protocol and a Claude implementation; passages are escaped and numbered, the system prompt allows only cited, passage-based answers and treats passage text as untrusted |
+| Review endpoint | `app.agentic_review.router` | `POST /documents/{id}/review`: ownership 404, then one finding per requirement; 503 without an API key, 502 if the model call fails |
+| Review logic | `app.agentic_review.review` | Retrieves passages per requirement, gets a verdict, drops invented citations and downgrades ungrounded verdicts to `not_found` ([ADR-0007](./adr/0007-review-verdicts-must-cite-real-passages.md)) |
+| Reviewer | `app.agentic_review.reviewer` | `Reviewer` protocol and a Claude implementation returning a schema-constrained `ReviewVerdict`; reuses the answerer's escaped, numbered passage format |
 
 ## End-to-end walkthrough: PDF in, passages out
 
@@ -241,5 +244,5 @@ Example: a 2-page job posting uploaded as `Data Engineer - Remote - Develocraft.
 
 ## Not built yet
 
-`agentic_review` (multi-turn review beyond the single-shot `POST /answer`), `authoring`, a
+Multi-turn or tool-using review (`agentic_review` has the single-turn `POST /documents/{id}/review`), `authoring`, a
 background worker for embedding.

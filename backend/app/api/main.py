@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.agentic_review.router import router as review_router
 from app.api.routes import login, private, users, utils
 from app.core.config import settings
 from app.ingestion.router import router as documents_router
@@ -11,6 +12,7 @@ api_router.include_router(users.router)
 api_router.include_router(utils.router)
 api_router.include_router(documents_router)
 api_router.include_router(search_router)
+api_router.include_router(review_router)
 
 
 if settings.FASTAPI_ENV == "development":

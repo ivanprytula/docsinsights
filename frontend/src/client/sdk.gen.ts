@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { documentsDeleteDocumentData, documentsDeleteDocumentErrors, documentsDeleteDocumentResponses, documentsReadDocumentData, documentsReadDocumentErrors, documentsReadDocumentResponses, documentsReadDocumentsData, documentsReadDocumentsErrors, documentsReadDocumentsResponses, documentsUploadDocumentData, documentsUploadDocumentErrors, documentsUploadDocumentResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginRefreshAccessTokenData, loginRefreshAccessTokenErrors, loginRefreshAccessTokenResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, searchAnswerQuestionData, searchAnswerQuestionErrors, searchAnswerQuestionResponses, searchSearchDocumentsData, searchSearchDocumentsErrors, searchSearchDocumentsResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { documentsDeleteDocumentData, documentsDeleteDocumentErrors, documentsDeleteDocumentResponses, documentsReadDocumentData, documentsReadDocumentErrors, documentsReadDocumentResponses, documentsReadDocumentsData, documentsReadDocumentsErrors, documentsReadDocumentsResponses, documentsUploadDocumentData, documentsUploadDocumentErrors, documentsUploadDocumentResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginRefreshAccessTokenData, loginRefreshAccessTokenErrors, loginRefreshAccessTokenResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reviewReviewDocumentData, reviewReviewDocumentErrors, reviewReviewDocumentResponses, searchAnswerQuestionData, searchAnswerQuestionErrors, searchAnswerQuestionResponses, searchSearchDocumentsData, searchSearchDocumentsErrors, searchSearchDocumentsResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -393,6 +393,26 @@ export class SearchService {
             responseType: 'json',
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/api/v1/answer',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class ReviewService {
+    /**
+     * Review Document
+     *
+     * Judge each requirement against the user's own document, with page-cited evidence.
+     */
+    public static reviewDocument<ThrowOnError extends boolean = true>(options: Options<reviewReviewDocumentData, ThrowOnError>) {
+        return (options.client ?? client).post<reviewReviewDocumentResponses, reviewReviewDocumentErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/documents/{document_id}/review',
             ...options,
             headers: {
                 'Content-Type': 'application/json',

@@ -1,0 +1,140 @@
+[
+  {
+    "requirement": "Personal data breaches must be notified to the supervisory authority within 72 hours",
+    "document": "gdpr.pdf",
+    "expected": "satisfied",
+    "pages": [
+      17,
+      52
+    ]
+  },
+  {
+    "requirement": "Personal data breaches must be notified to the supervisory authority within 24 hours",
+    "document": "gdpr.pdf",
+    "expected": "not_satisfied",
+    "pages": [
+      17,
+      52
+    ]
+  },
+  {
+    "requirement": "Controllers must respond to a data subject's request within one month",
+    "document": "gdpr.pdf",
+    "expected": "satisfied",
+    "pages": [
+      40
+    ]
+  },
+  {
+    "requirement": "Controllers must respond to a data subject's request within seven days with no possible extension",
+    "document": "gdpr.pdf",
+    "expected": "not_satisfied",
+    "pages": [
+      40
+    ]
+  },
+  {
+    "requirement": "Public authorities must designate a data protection officer",
+    "document": "gdpr.pdf",
+    "expected": "satisfied",
+    "pages": [
+      55
+    ]
+  },
+  {
+    "requirement": "Member States may not set the age of consent for children's data below 16",
+    "document": "gdpr.pdf",
+    "expected": "not_satisfied",
+    "pages": [
+      37
+    ]
+  },
+  {
+    "requirement": "A data protection impact assessment is required where processing is likely to result in a high risk",
+    "document": "gdpr.pdf",
+    "expected": "satisfied",
+    "pages": [
+      53
+    ]
+  },
+  {
+    "requirement": "Infringing data subjects' rights can lead to fines of up to 20 million EUR or 4% of worldwide turnover",
+    "document": "gdpr.pdf",
+    "expected": "satisfied",
+    "pages": [
+      83
+    ]
+  },
+  {
+    "requirement": "Organisations must appoint a Chief Information Security Officer",
+    "document": "gdpr.pdf",
+    "expected": "not_found",
+    "pages": []
+  },
+  {
+    "requirement": "Controllers must publish the source code of their data processing software",
+    "document": "gdpr.pdf",
+    "expected": "not_found",
+    "pages": []
+  },
+  {
+    "requirement": "AI systems used for social scoring are prohibited",
+    "document": "eu-ai-act.pdf",
+    "expected": "satisfied",
+    "pages": [
+      51
+    ]
+  },
+  {
+    "requirement": "AI systems may infer emotions of employees in the workplace without any restriction",
+    "document": "eu-ai-act.pdf",
+    "expected": "not_satisfied",
+    "pages": [
+      51
+    ]
+  },
+  {
+    "requirement": "High-risk AI systems must be designed so that natural persons can effectively oversee them",
+    "document": "eu-ai-act.pdf",
+    "expected": "satisfied",
+    "pages": [
+      60
+    ]
+  },
+  {
+    "requirement": "People must be informed when they interact directly with an AI system, unless this is obvious",
+    "document": "eu-ai-act.pdf",
+    "expected": "satisfied",
+    "pages": [
+      82
+    ]
+  },
+  {
+    "requirement": "Engaging in a prohibited AI practice can be fined up to 35 million EUR or 7% of worldwide turnover",
+    "document": "eu-ai-act.pdf",
+    "expected": "satisfied",
+    "pages": [
+      115
+    ]
+  },
+  {
+    "requirement": "Fines for prohibited AI practices are capped at 10 million EUR",
+    "document": "eu-ai-act.pdf",
+    "expected": "not_satisfied",
+    "pages": [
+      115
+    ]
+  },
+  {
+    "requirement": "AI providers must pay an annual registration fee per deployed system",
+    "document": "eu-ai-act.pdf",
+    "expected": "not_found",
+    "pages": []
+  },
+  {
+    "requirement": "AI systems must be certified under ISO/IEC 42001 before being placed on the market",
+    "document": "eu-ai-act.pdf",
+    "expected": "not_found",
+    "pages": []
+  }
+]

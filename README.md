@@ -78,6 +78,7 @@ Texts are reused from EUR-Lex under its [legal notice](https://eur-lex.europa.eu
 
 ```sh
 cd backend && uv run python -m evals.retrieval
+# review verdicts (needs ANTHROPIC_API_KEY): uv run python -m evals.review
 ```
 
 **What the numbers mean.** Each question is labeled with the page(s) that answer it. A question counts as found if *any one* labeled page appears in the top k search results.

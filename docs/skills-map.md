@@ -144,7 +144,7 @@ than a contrived "yes".
 
 | Facet | Status | Depth | Where |
 | --- | --- | --- | --- |
-| LLM as reviewer, not chatbot | ⏳ P2 | — | Structured output (Pydantic model) for agentic review. Claude grades document clarity + consistency against a rubric. |
+| LLM as reviewer, not chatbot | 🟡 P4 | L1 | `POST /documents/{id}/review`: Claude returns a Pydantic-schema verdict per caller-supplied requirement, with page citations; ungrounded verdicts are downgraded (ADR-0007). Smoke-tested by `evals.review`: 18/18 verdicts on an easy 18-requirement set. Missing: rubric checklists, multi-turn critique. |
 | RAG over document corpus | 🟡 P3 | L1 | Retrieval half works: chunk, embed, store, `POST /search` returns ranked passages with page numbers (see `docs/c4-architecture.md` walkthrough). Measured by the evaluation harness (`backend/evals/`). `POST /answer` adds a single-shot LLM answer with `[n]` page citations (tested with a fake model, live-checked on 2 questions). A keyword leg was tried and removed: no gain on the eval set (ADR-0006). Missing: reranker. |
 | Embedding pipeline | 🟡 P2 | L1 | Upload -> parse PDF (pypdf, overlapping 250-word windows per page) -> embed (`ingestion/embedder.py`, fastembed bge-small, CPU) -> store, synchronously in the request (ADR-0005). No batching bounds, cache, or background worker yet. |
 | Retrieval evaluation | ✅ P3 | L1 | `backend/evals/`: 75 labeled questions over GDPR and the AI Act, Recall@1/3/5 and MRR through the real ingest and search code on a throwaway pgvector container. Vector-only baseline Recall@1 0.33, Recall@5 0.65, MRR 0.45 on 75 questions (README explains the mixed label policy). Bootstrap intervals and saved JSON runs. Small set, run by hand: not CI-gated. A keyword-leg experiment was measured here and dropped (ADR-0006). |
@@ -172,7 +172,7 @@ than a contrived "yes".
 | --- | --- | --- | --- |
 | Versioned prompts | ⏳ P2 | — | In-repo `backend/app/infrastructure/review_prompt.py`: system + user prompts. Changes flow through code review. |
 | Snapshot tests | ⏳ P2 | — | Snapshot tests on review output parse results. Prompt changes produce reviewable diffs. |
-| Structured output | ⏳ P2 | — | Pydantic model for review findings. LLM returns JSON or review fails gracefully. |
+| Structured output | ✅ P4 | L1 | `ReviewVerdict` via `messages.parse`; refusal or truncation yields a null verdict, not an error. Citation numbers are validated against the passages sent (ADR-0007). |
 | Injection hardening | ⏳ P2 | — | Document content flows into LLM as JSON-escaped. Instruction hierarchy: review task → rubric → delimited content. |
 
 ### Fluency with AI coding assistants
