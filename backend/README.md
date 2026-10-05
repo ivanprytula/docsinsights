@@ -71,10 +71,10 @@ docker compose exec backend bash
 To test the backend, run from the project root:
 
 ```console
-just test
+just test-local
 ```
 
-The tests run with Pytest. Modify existing tests or add new ones in `./backend/tests/`.
+The tests run with Pytest against a throwaway pgvector Postgres started by testcontainers, so Docker must be running; your development database is never touched. Modify existing tests or add new ones in `./backend/tests/`.
 
 If you use GitHub Actions, the tests will run automatically.
 

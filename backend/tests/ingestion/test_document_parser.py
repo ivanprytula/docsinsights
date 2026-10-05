@@ -102,12 +102,23 @@ def test_split_into_windows_does_not_emit_a_window_fully_inside_the_previous() -
     assert windows == ["w0 w1 w2 w3", "w3 w4 w5 w6"]
 
 
-def test_split_into_windows_preserves_original_whitespace_inside_a_window() -> None:
-    text = "alpha\nbeta  gamma\ndelta epsilon"
+def test_split_into_windows_collapses_newlines_and_repeated_spaces() -> None:
+    text = "alpha\nbeta  gamma\n\ndelta epsilon"
 
-    windows = split_into_windows(text, max_words=3, overlap_words=1)
+    assert split_into_windows(text, max_words=10, overlap_words=1) == [
+        "alpha beta gamma delta epsilon"
+    ]
+    assert split_into_windows(text, max_words=3, overlap_words=1)[0] == (
+        "alpha beta gamma"
+    )
 
-    assert windows[0] == "alpha\nbeta  gamma"
+
+def test_parse_pdf_collapses_whitespace_in_extracted_text() -> None:
+    pdf_bytes = make_pdf_bytes(["one   two    three"])
+
+    chunks = parse_pdf(io.BytesIO(pdf_bytes), doc_id=uuid.uuid4())
+
+    assert chunks[0].text == "one two three"
 
 
 def test_parse_pdf_splits_long_page_into_chunks_sharing_the_page_number() -> None:

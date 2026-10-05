@@ -1,0 +1,602 @@
+[
+  {
+    "question": "What must a contract between a controller and a processor require?",
+    "document": "gdpr.pdf",
+    "pages": [
+      16,
+      49,
+      50
+    ]
+  },
+  {
+    "question": "Within how many hours must a personal data breach be reported to the supervisory authority?",
+    "document": "gdpr.pdf",
+    "pages": [
+      17,
+      52
+    ]
+  },
+  {
+    "question": "What is the maximum fine for infringing the basic principles for processing or the rights of data subjects?",
+    "document": "gdpr.pdf",
+    "pages": [
+      83
+    ]
+  },
+  {
+    "question": "When must a data protection impact assessment be carried out?",
+    "document": "gdpr.pdf",
+    "pages": [
+      17,
+      53,
+      54
+    ]
+  },
+  {
+    "question": "How can a data subject withdraw consent?",
+    "document": "gdpr.pdf",
+    "pages": [
+      8,
+      37
+    ]
+  },
+  {
+    "question": "Does a person have the right to have their personal data deleted?",
+    "document": "gdpr.pdf",
+    "pages": [
+      12,
+      13,
+      43,
+      44
+    ]
+  },
+  {
+    "question": "Which organisations must appoint a data protection officer?",
+    "document": "gdpr.pdf",
+    "pages": [
+      19,
+      55
+    ]
+  },
+  {
+    "question": "What principles govern the processing of personal data?",
+    "document": "gdpr.pdf",
+    "pages": [
+      35,
+      36
+    ]
+  },
+  {
+    "question": "Can I get a copy of the personal data a company holds about me?",
+    "document": "gdpr.pdf",
+    "pages": [
+      12,
+      43
+    ]
+  },
+  {
+    "question": "What safeguards allow transferring personal data outside the EU without an adequacy decision?",
+    "document": "gdpr.pdf",
+    "pages": [
+      20,
+      21,
+      62
+    ]
+  },
+  {
+    "question": "What must binding corporate rules specify?",
+    "document": "gdpr.pdf",
+    "pages": [
+      21,
+      62,
+      63,
+      64
+    ]
+  },
+  {
+    "question": "Which AI practices are prohibited?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      51,
+      52,
+      53
+    ]
+  },
+  {
+    "question": "Can an employer use AI to detect the emotions of employees?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      12,
+      51
+    ]
+  },
+  {
+    "question": "What obligations do providers of high-risk AI systems have?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      62
+    ]
+  },
+  {
+    "question": "What human oversight must high-risk AI systems allow?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      60,
+      61
+    ]
+  },
+  {
+    "question": "Do users have to be told when they are talking to a chatbot?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      33,
+      82
+    ]
+  },
+  {
+    "question": "What is the maximum fine for using prohibited AI practices?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      115
+    ]
+  },
+  {
+    "question": "What must providers of general-purpose AI models do?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      84,
+      85
+    ]
+  },
+  {
+    "question": "When does the AI Act start to apply?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      123
+    ]
+  },
+  {
+    "question": "What must the technical documentation of a high-risk AI system contain?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      58,
+      130,
+      131
+    ]
+  },
+  {
+    "question": "Which AI systems are classified as high-risk?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      53,
+      54,
+      127,
+      128,
+      129
+    ]
+  },
+  {
+    "question": "fundamental rights impact assessment",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      25,
+      69,
+      70
+    ]
+  },
+  {
+    "question": "What does Article 33 of the GDPR require?",
+    "document": "gdpr.pdf",
+    "pages": [
+      52
+    ]
+  },
+  {
+    "question": "What does Article 22 of the GDPR say about automated individual decision-making?",
+    "document": "gdpr.pdf",
+    "pages": [
+      46
+    ]
+  },
+  {
+    "question": "What does Article 83 of the GDPR say about administrative fines?",
+    "document": "gdpr.pdf",
+    "pages": [
+      82,
+      83
+    ]
+  },
+  {
+    "question": "What does Annex IV of the AI Act list?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      130,
+      131
+    ]
+  },
+  {
+    "question": "What does Article 14 of the AI Act require?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      60,
+      61
+    ]
+  },
+  {
+    "question": "What does Article 99 of the AI Act set out?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      115,
+      116
+    ]
+  },
+  {
+    "question": "How long can a company keep my personal data?",
+    "document": "gdpr.pdf",
+    "pages": [
+      35,
+      36
+    ]
+  },
+  {
+    "question": "When is it legal to process personal data?",
+    "document": "gdpr.pdf",
+    "pages": [
+      36,
+      37
+    ]
+  },
+  {
+    "question": "Can a service refuse to work unless I agree to data processing it does not need?",
+    "document": "gdpr.pdf",
+    "pages": [
+      37
+    ]
+  },
+  {
+    "question": "At what age can a child consent to online services?",
+    "document": "gdpr.pdf",
+    "pages": [
+      37,
+      38
+    ]
+  },
+  {
+    "question": "Is it allowed to process data about a person's health or religion?",
+    "document": "gdpr.pdf",
+    "pages": [
+      38,
+      39
+    ]
+  },
+  {
+    "question": "What information must a company give me when it collects my data directly from me?",
+    "document": "gdpr.pdf",
+    "pages": [
+      40,
+      41
+    ]
+  },
+  {
+    "question": "How quickly must a company answer a request from a data subject?",
+    "document": "gdpr.pdf",
+    "pages": [
+      39,
+      40
+    ]
+  },
+  {
+    "question": "Can I ask a company to correct wrong personal data about me?",
+    "document": "gdpr.pdf",
+    "pages": [
+      43
+    ]
+  },
+  {
+    "question": "Can I move my data to another service provider?",
+    "document": "gdpr.pdf",
+    "pages": [
+      45
+    ]
+  },
+  {
+    "question": "Can I object to my data being used for direct marketing?",
+    "document": "gdpr.pdf",
+    "pages": [
+      45,
+      46
+    ]
+  },
+  {
+    "question": "What does data protection by design mean?",
+    "document": "gdpr.pdf",
+    "pages": [
+      48
+    ]
+  },
+  {
+    "question": "Do small companies have to keep records of their processing activities?",
+    "document": "gdpr.pdf",
+    "pages": [
+      50,
+      51
+    ]
+  },
+  {
+    "question": "What security measures does the GDPR expect from organisations?",
+    "document": "gdpr.pdf",
+    "pages": [
+      51,
+      52
+    ]
+  },
+  {
+    "question": "When do I have to be told about a data breach that affects me?",
+    "document": "gdpr.pdf",
+    "pages": [
+      52,
+      53
+    ]
+  },
+  {
+    "question": "Who can I complain to if my data is misused?",
+    "document": "gdpr.pdf",
+    "pages": [
+      80
+    ]
+  },
+  {
+    "question": "Can I get compensation if a company breaks the GDPR and harms me?",
+    "document": "gdpr.pdf",
+    "pages": [
+      81,
+      82
+    ]
+  },
+  {
+    "question": "Can personal data be sent to a country the European Commission considers adequate?",
+    "document": "gdpr.pdf",
+    "pages": [
+      61,
+      62
+    ]
+  },
+  {
+    "question": "What powers do supervisory authorities have to stop a company processing data?",
+    "document": "gdpr.pdf",
+    "pages": [
+      69,
+      70
+    ]
+  },
+  {
+    "question": "Do joint controllers have to agree on who is responsible for what?",
+    "document": "gdpr.pdf",
+    "pages": [
+      48
+    ]
+  },
+  {
+    "question": "Does the GDPR apply to a company based outside the EU?",
+    "document": "gdpr.pdf",
+    "pages": [
+      32,
+      33
+    ]
+  },
+  {
+    "question": "How does the GDPR define personal data?",
+    "document": "gdpr.pdf",
+    "pages": [
+      33,
+      34,
+      35
+    ]
+  },
+  {
+    "question": "Can a data protection officer be dismissed for doing their job?",
+    "document": "gdpr.pdf",
+    "pages": [
+      55,
+      56
+    ]
+  },
+  {
+    "question": "What does Article 17 of the GDPR say?",
+    "document": "gdpr.pdf",
+    "pages": [
+      43,
+      44
+    ]
+  },
+  {
+    "question": "What does Article 28 of the GDPR require of processors?",
+    "document": "gdpr.pdf",
+    "pages": [
+      49,
+      50
+    ]
+  },
+  {
+    "question": "What does Article 35 of the GDPR cover?",
+    "document": "gdpr.pdf",
+    "pages": [
+      53,
+      54
+    ]
+  },
+  {
+    "question": "What does Article 30 of the GDPR require?",
+    "document": "gdpr.pdf",
+    "pages": [
+      50,
+      51
+    ]
+  },
+  {
+    "question": "What quality requirements apply to the data used to train high-risk AI?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      57,
+      58
+    ]
+  },
+  {
+    "question": "Must high-risk AI systems keep logs of what they do?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      59
+    ]
+  },
+  {
+    "question": "What risk management is required for high-risk AI systems?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      56,
+      57
+    ]
+  },
+  {
+    "question": "How accurate and secure must a high-risk AI system be?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      61,
+      62
+    ]
+  },
+  {
+    "question": "What must companies using high-risk AI systems do?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      67,
+      68,
+      69
+    ]
+  },
+  {
+    "question": "Do deepfakes and AI-generated content have to be labelled?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      82,
+      83
+    ]
+  },
+  {
+    "question": "Which general-purpose AI models count as having systemic risk?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      83
+    ]
+  },
+  {
+    "question": "Can police use real-time facial recognition in public places?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      51,
+      52,
+      53
+    ]
+  },
+  {
+    "question": "Is scoring people by their social behaviour banned?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      51,
+      52,
+      53
+    ]
+  },
+  {
+    "question": "What information must come with a high-risk AI system for its users?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      59,
+      60
+    ]
+  },
+  {
+    "question": "When does a company that rebrands someone else's high-risk AI system become its provider?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      67
+    ]
+  },
+  {
+    "question": "Do AI providers outside the EU need a representative in the EU?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      65
+    ]
+  },
+  {
+    "question": "What is an AI regulatory sandbox?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      88,
+      89,
+      90
+    ]
+  },
+  {
+    "question": "Can people complain to an authority about an AI system?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      110
+    ]
+  },
+  {
+    "question": "Do high-risk AI systems need a CE marking?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      81
+    ]
+  },
+  {
+    "question": "Do staff using AI have to be trained about it?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      51
+    ]
+  },
+  {
+    "question": "What fines apply to providers of general-purpose AI models?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      117,
+      118
+    ]
+  },
+  {
+    "question": "What must a quality management system for high-risk AI include?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      62,
+      63
+    ]
+  },
+  {
+    "question": "What does Article 5 of the AI Act prohibit?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      51,
+      52,
+      53
+    ]
+  },
+  {
+    "question": "What does Article 27 of the AI Act require?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      69,
+      70
+    ]
+  },
+  {
+    "question": "What does Article 50 of the AI Act cover?",
+    "document": "eu-ai-act.pdf",
+    "pages": [
+      82,
+      83
+    ]
+  }
+]

@@ -46,7 +46,7 @@ than a contrived "yes".
 
 | Facet | Status | Depth | Where |
 | --- | --- | --- | --- |
-| REST, domain-language endpoints | ✅ P1 | L1 | `backend/app/ingestion/router.py` — `POST /documents/`, `GET /documents/`, `GET /documents/{id}`, `DELETE /documents/{id}`. Owner-scoped (403 on non-owner, matching `items.py`'s pattern). `POST /documents/{id}/search` planned for Phase 2 retrieval. |
+| REST, domain-language endpoints | ✅ P1 | L1 | `app.ingestion.router` - `POST /documents/upload`, `GET /documents/`, `GET /documents/{id}`, `DELETE /documents/{id}`; `app.retrieval.router` - `POST /search` (optional `document_id`). Owner-scoped: a missing or foreign document returns 404 so ids cannot be probed (superusers can read and delete any document; search is always the caller's own). |
 | OpenAPI → generated TS client | ⏳ P1 | — | `just generate-client` ready; CI will regenerate and run `tsc -b` — API drift fails the build. Schema-first contract. |
 | GraphQL BFF | ❌ | — | Deferred. REST sufficient for phase 1; GraphQL added only if N+1 query patterns emerge. |
 
@@ -65,8 +65,8 @@ than a contrived "yes".
 | --- | --- | --- | --- |
 | Relational modeling | ✅ P1 | L1 | `backend/app/ingestion/models.py` - `Document` (owner FK, cascade-delete) and `DocumentChunk` (one row per page, FK cascade-delete, `embedding vector(384)`). |
 | Migrations | ✅ P1 | L1 | Alembic: initial schema (UUIDv7) plus `eb6f038d729c` (pgvector extension + `documentchunk.embedding`); upgrade/downgrade round-trip verified, `alembic check` clean. Per-domain model discovery wired in `alembic/env.py` (ADR-0003). |
-| Vector store | 🟡 P2 | L1 | pgvector on `documentchunk.embedding`, `NOT NULL`, dimensions read from the fastembed model registry (ADR-0005). Written on upload; not queried yet (Phase 3). No separate vector DB. |
-| Query performance | ⏳ P3 | — | Planned: `EXPLAIN ANALYZE` on semantic search queries (vector + keyword hybrid). |
+| Vector store | ✅ P2 | L1 | pgvector on `documentchunk.embedding`, `NOT NULL`, dimensions read from the fastembed model registry (ADR-0005). Written on upload and queried by `POST /search`. No separate vector DB. |
+| Query performance | ⏳ P3 | — | Planned: `EXPLAIN ANALYZE` on semantic search queries (vector search). |
 
 ### CI/CD, containers, secrets, DNS/HTTPS
 
@@ -145,9 +145,9 @@ than a contrived "yes".
 | Facet | Status | Depth | Where |
 | --- | --- | --- | --- |
 | LLM as reviewer, not chatbot | ⏳ P2 | — | Structured output (Pydantic model) for agentic review. Claude grades document clarity + consistency against a rubric. |
-| RAG over document corpus | ⏳ P2 | — | Document chunks semantically searched, embedded context fed to reviewer LLM. Recall@k eval planned for golden set. |
+| RAG over document corpus | 🟡 P3 | L1 | Retrieval half works: chunk, embed, store, `POST /search` returns ranked passages with page numbers (see `docs/c4-architecture.md` walkthrough). Measured by the evaluation harness (`backend/evals/`). `POST /answer` adds a single-shot LLM answer with `[n]` page citations (tested with a fake model, live-checked on 2 questions). A keyword leg was tried and removed: no gain on the eval set (ADR-0006). Missing: reranker. |
 | Embedding pipeline | 🟡 P2 | L1 | Upload -> parse PDF (pypdf, overlapping 250-word windows per page) -> embed (`ingestion/embedder.py`, fastembed bge-small, CPU) -> store, synchronously in the request (ADR-0005). No batching bounds, cache, or background worker yet. |
-| Retrieval evaluation | ⏳ P3 | — | Recall@k on labeled golden set. CI-gating once real docs exist. |
+| Retrieval evaluation | ✅ P3 | L1 | `backend/evals/`: 75 labeled questions over GDPR and the AI Act, Recall@1/3/5 and MRR through the real ingest and search code on a throwaway pgvector container. Vector-only baseline Recall@1 0.33, Recall@5 0.65, MRR 0.45 on 75 questions (README explains the mixed label policy). Bootstrap intervals and saved JSON runs. Small set, run by hand: not CI-gated. A keyword-leg experiment was measured here and dropped (ADR-0006). |
 | Cost + latency control | ⏳ P2 | — | LLM calls only on agentic review phase (once per document). Caching: identical chunks reuse cached embedding + review. |
 
 ### Agentic workflows and tool use (MCP)
@@ -163,7 +163,7 @@ than a contrived "yes".
 
 | Facet | Status | Depth | Where |
 | --- | --- | --- | --- |
-| pgvector | 🟡 P2 | L1 | Plain `vector(384)` column, `pgvector/pgvector:pg18` image in compose and CI. No distance queries or HNSW/IVFFlat index yet (Phase 3). |
+| pgvector | 🟡 P2 | L1 | Cosine-distance queries (`<=>`) via `app.retrieval.search`, owner-scoped in SQL; `pgvector/pgvector:pg18` image in compose and CI. Sequential scan only: no HNSW/IVFFlat index yet. |
 | **Why not Pinecone/Weaviate/Qdrant** | ❌ | — | At this corpus size (100s–1000s of documents), a dedicated vector DB is overkill. Document corpus size threshold recorded; will switch if needed. |
 
 ### Prompt / context engineering as engineering
@@ -215,7 +215,7 @@ Systematic approach to deepen coverage incrementally across all four dimensions
 
 | Focus | Current | Next step | Why |
 | --- | --- | --- | --- |
-| Semantic search performance | L0 | Measure vector vs keyword search latency; benchmark hybrid approach | Claims about relevance are hollow without data |
+| Semantic search performance | L0 | Measure vector search latency (`EXPLAIN ANALYZE`); the keyword leg was already judged on quality and dropped (ADR-0006) | Claims about relevance are hollow without data |
 | Embedding latency | L0 | Measure throughput under concurrent document ingestion | Capacity planning depends on real numbers |
 | Prompt engineering | L0 | Snapshot tests for prompt changes; measure parse failure rate | Prompt regressions hide in iteration |
 | LLM review cost | L0 | Track cost per document + parse failure rate; baseline metrics | Economics matter; establish baseline now |
@@ -233,7 +233,7 @@ Systematic approach to deepen coverage incrementally across all four dimensions
 
 | Focus | Current | Next step | Why |
 | --- | --- | --- | --- |
-| RAG pipeline | L0 | Implement hybrid search (vector + keyword); measure Recall@k on golden set | Differentiator: measurement proves quality |
+| RAG pipeline | L0 | Grow the golden set past 75 questions; retry a keyword leg only with rarity-aware ranking (ADR-0006) | Differentiator: measurement proves quality |
 | Agentic workflows | L0 | LangGraph agent for document review; eval harness for regression detection | Agents without measurement are demos |
 | Prompt versioning | L0 | Add CI checks for prompt drift; snapshot tests on fixed input set | Prompts are code; treat as such |
 | Cost estimation | L0 | Back-of-envelope: tokens/document, documents/session, LLM cost/MAU | Matters for product pricing + pitch |
@@ -282,7 +282,7 @@ Given a JD requirement or technical skill, jump to the relevant code and depth l
 | "LLM-based document review / structured output" | Planned | L0 | Implement review Pydantic model + streaming feedback |
 | "Prompt engineering / versioning" | Planned | L0 | In-repo prompts, snapshot tests, CI drift detection |
 | "Prompt injection defense" | Planned | L0 | Escaping, instruction hierarchy, output validation |
-| "RAG / semantic search" | Planned | L0 | pgvector corpus + Recall@k eval in CI |
+| "RAG / semantic search" | `backend/app/retrieval/`, `backend/evals/` | L1 | Recall@k eval is not CI-gated; golden set is small |
 | "Cost + latency control" | Planned | L0 | Cache embeddings + reviews; measure metrics |
 | "Agentic workflows / tool use" | Planned | L0 | LangGraph review loop with human-in-the-loop |
 

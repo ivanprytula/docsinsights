@@ -5,6 +5,62 @@ export type ClientOptions = {
 };
 
 /**
+ * Answer
+ *
+ * `answer` is None when no answer was produced; `sources` are numbered as the [n] citations.
+ */
+export type Answer = {
+    /**
+     * Answer
+     */
+    answer: string | null;
+    /**
+     * Sources
+     */
+    sources: Array<AnswerSource>;
+};
+
+/**
+ * AnswerRequest
+ */
+export type AnswerRequest = {
+    /**
+     * Question
+     */
+    question: string;
+    /**
+     * Document Id
+     */
+    document_id?: string | null;
+    /**
+     * Limit
+     */
+    limit?: number;
+};
+
+/**
+ * AnswerSource
+ */
+export type AnswerSource = {
+    /**
+     * N
+     */
+    n: number;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Page Num
+     */
+    page_num: number;
+    /**
+     * Text
+     */
+    text: string;
+};
+
+/**
  * Body_documents-upload_document
  */
 export type Body_documents_upload_document = {
@@ -144,6 +200,68 @@ export type RefreshTokenRequest = {
      * Refresh Token
      */
     refresh_token: string;
+};
+
+/**
+ * SearchHit
+ */
+export type SearchHit = {
+    /**
+     * Chunk Id
+     */
+    chunk_id: string;
+    /**
+     * Document Id
+     */
+    document_id: string;
+    /**
+     * Filename
+     */
+    filename: string;
+    /**
+     * Page Num
+     */
+    page_num: number;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Score
+     */
+    score: number;
+};
+
+/**
+ * SearchRequest
+ */
+export type SearchRequest = {
+    /**
+     * Query
+     */
+    query: string;
+    /**
+     * Document Id
+     */
+    document_id?: string | null;
+    /**
+     * Limit
+     */
+    limit?: number;
+};
+
+/**
+ * SearchResults
+ */
+export type SearchResults = {
+    /**
+     * Data
+     */
+    data: Array<SearchHit>;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**
@@ -914,6 +1032,56 @@ export type documentsUploadDocumentResponses = {
 };
 
 export type documentsUploadDocumentResponse = documentsUploadDocumentResponses[keyof documentsUploadDocumentResponses];
+
+export type searchSearchDocumentsData = {
+    body: SearchRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/search';
+};
+
+export type searchSearchDocumentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type searchSearchDocumentsError = searchSearchDocumentsErrors[keyof searchSearchDocumentsErrors];
+
+export type searchSearchDocumentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SearchResults;
+};
+
+export type searchSearchDocumentsResponse = searchSearchDocumentsResponses[keyof searchSearchDocumentsResponses];
+
+export type searchAnswerQuestionData = {
+    body: AnswerRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/answer';
+};
+
+export type searchAnswerQuestionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type searchAnswerQuestionError = searchAnswerQuestionErrors[keyof searchAnswerQuestionErrors];
+
+export type searchAnswerQuestionResponses = {
+    /**
+     * Successful Response
+     */
+    200: Answer;
+};
+
+export type searchAnswerQuestionResponse = searchAnswerQuestionResponses[keyof searchAnswerQuestionResponses];
 
 export type privateCreateUserData = {
     body: PrivateUserCreate;

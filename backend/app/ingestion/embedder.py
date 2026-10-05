@@ -1,10 +1,13 @@
 from collections.abc import Sequence
+from functools import lru_cache
 from typing import Protocol
 
 from fastembed import TextEmbedding
 
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 DEFAULT_DIMENSIONS = 384
+# fastembed defaults to 256, which let the container grow past 4 GB while embedding one PDF.
+EMBED_BATCH_SIZE = 32
 
 
 def _lookup_dimensions(model_name: str) -> int:
@@ -39,8 +42,17 @@ class FastEmbedEmbedder:
 
     def embed_documents(self, texts: Sequence[str]) -> list[list[float]]:
         """Embed passages for storage; no prefix."""
-        return [v.tolist() for v in self._get_model().embed(list(texts))]
+        return [
+            v.tolist()
+            for v in self._get_model().embed(list(texts), batch_size=EMBED_BATCH_SIZE)
+        ]
 
     def embed_query(self, text: str) -> list[float]:
         """Embed a search query; bge-small v1.5 needs no instruction prefix (ADR-0005)."""
         return self.embed_documents([text])[0]
+
+
+@lru_cache
+def get_embedder() -> Embedder:
+    """One embedder per process so the model loads once."""
+    return FastEmbedEmbedder()

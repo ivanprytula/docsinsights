@@ -35,6 +35,14 @@ Add a `role` column to the `User` table with an enum type (`"user"` | `"admin"`)
 - **`is_superuser` remains unchanged.** It continues to gate admin routes (`POST /users`, `DELETE /users/{id}`, etc.). This keeps Phase 1 focused on identity, not authorization.
 - **Migration:** Single `ALTER TABLE` adds the column with a PostgreSQL enum type.
 
+### Document Access: 404 for Missing or Foreign Resources (added 2026-10-02)
+
+Phase 2 shipped owner-scoped documents. A document id that is missing or belongs to someone else returns **404 `"Document not found"`**, identically, on `GET` and `DELETE /documents/{id}` and on `POST /search` with a `document_id`. These first returned 403 for foreign documents, which tells a caller which ids exist.
+
+- **Superusers** can read and delete any document; search is always scoped to the caller's own documents.
+- **Rejected:** 403 for foreign (probing), and 200 with empty results (hides typos as "no matches").
+- **Retrieval reads documents through ingestion's public `get_document`**, consistent with the one-way dependency in ADR-0003.
+
 ## Rationale
 
 ### Stateless Refresh JWT over DB-Backed
@@ -71,6 +79,8 @@ Deferring enforcement to Phase 2 keeps Phase 1 tightly scoped to **identity and 
 - **If logout becomes a requirement** — A logout endpoint needs server-side revocation. At that point, migrate to DB-backed refresh tokens (store hash + expiry + revocation flag, check on use).
 - **If token rotation is needed for security** — Stateless tokens cannot be rotated server-side. Add a token refresh counter or migration token.
 - **If role-based enforcement is added in Phase 2** — The role field is already in the schema; Phase 2 adds the middleware/checks that respect it.
+
+- **If documents become shareable** — a collaborator who can see but not edit a document is a real 403 case. Revisit per route, keeping 404 for documents the caller cannot see at all.
 
 ## Alternatives Considered
 

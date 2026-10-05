@@ -37,23 +37,9 @@ down-clean:
 
 # === Testing ===
 
-# Run backend tests locally (requires running `docker compose up -d db`)
+# Run backend tests locally against a throwaway pgvector container (needs Docker running)
 test-local:
     cd backend && rm -rf htmlcov && FASTAPI_ENV=development uv run pytest
-
-# Run backend tests in containerized stack
-test:
-    docker compose exec -T backend rm -rf htmlcov
-    docker compose exec -T -e FASTAPI_ENV=development backend python -m pytest
-
-# Full CI-like suite: build, run, test, cleanup
-test-ci:
-    docker compose build
-    docker compose down -v --remove-orphans
-    docker compose run --rm backend uv run python -m alembic upgrade head
-    docker compose up -d
-    docker compose exec -T -e FASTAPI_ENV=development backend python -m pytest
-    docker compose down -v --remove-orphans
 
 # === Code Generation & Integration ===
 

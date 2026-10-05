@@ -74,10 +74,11 @@ uv run alembic upgrade head
 
 ## Testing
 
-- **Structure:** Unit tests in `backend/tests/unit/`, integration tests in `backend/tests/integration/`.
+- **Structure:** `backend/tests/api/` (routes), `crud/`, and one folder per domain package (`ingestion/`, `retrieval/`); helpers in `tests/utils/`.
+- **Database:** The suite runs on a throwaway pgvector container (testcontainers) with migrations applied; the development database is never touched. Needs Docker.
 - **E2E with Playwright:** Tests in `frontend/tests/`, run via `docker compose` (backend must be running).
 - **Naming:** Test functions describe the scenario: `test_authenticate_with_valid_email_succeeds`, not `test_auth`.
-- **Coverage:** Run locally: `just test`. CI enforces 80% coverage on backend.
+- **Coverage:** Run locally: `just test-local`. CI enforces 80% coverage on backend.
 
 ## Frontend (Bun + React + TypeScript)
 
@@ -89,20 +90,21 @@ uv run alembic upgrade head
 
 ## Architecture
 
-**Current state:** Modular monolith. Backend is a single FastAPI service; frontend is React + TypeScript.
+**Current state:** Modular monolith. Backend is a single FastAPI service with domain packages `ingestion/` (PDF parsing, chunking, embedding, documents) and `retrieval/` (semantic search); frontend is React + TypeScript. See `docs/c4-architecture.md`.
 
-**Planned (after auth is solid):** RAG/document-ingestion domain as internal backend packages (`ingestion/`, `retrieval/`, `agentic_review/`, `authoring/`) — no separate services yet. Service split happens only when a real architectural seam appears (e.g., OCR/document-processing CPU scaling).
+**Planned:** `agentic_review/` and `authoring/` as further internal backend packages — no separate services yet. Service split happens only when a real architectural seam appears (e.g., OCR/document-processing CPU scaling).
 
 **No layering enforcement yet** (unlike term-rush's import-linter), but follow this mental model:
 - `api/` — FastAPI routes, dependency injection, request/response mapping
 - `crud.py` — Database operations
 - `models.py` — SQLModel entities and Pydantic schemas
 - `core/` — Config, auth, security
+- `ingestion/`, `retrieval/` — Domain packages, each with its own models, CRUD and router; `retrieval` depends on `ingestion`, never the reverse (ADR-0003)
 - `utils.py` — Helpers (password hashing, email, etc.)
 
 ## Environment & Configuration
 
-- `.env` — Local development defaults (DB creds, API keys, etc.). Tracked in git for reference; secrets overridden at deploy time.
+- `.env` — Local development defaults (DB creds, API keys, etc.). Gitignored, never committed; secrets overridden at deploy time.
 - `compose.yml` — Shared Docker Compose config (db, mailpit, backend, frontend ports).
 - `compose.override.yml` — Local dev overrides (volume mounts, hot-reload).
 - `compose.deploy.yml` — Production overrides (HTTPS, certs via Traefik).
@@ -114,7 +116,7 @@ uv run alembic upgrade head
 Before claiming work is done:
 
 1. `just check` — code quality (ruff + ty) + tests pass
-2. Run affected tests: `just test backend/tests/unit/...` (for backend), `just test-frontend` (for Playwright)
+2. Run affected tests: `cd backend && uv run python -m pytest tests/ingestion` (for backend), `bunx playwright test` (for Playwright, needs the Docker stack)
 3. Check error messages — generic wording, no info leaks
 4. Rebuild locally: `docker compose build && docker compose up -d && curl http://localhost:8000/api/v1/utils/health-check && docker compose down`
 5. **Markdown files:** Spell-check, code block language tags, no hardcoded line numbers
@@ -124,9 +126,8 @@ Before claiming work is done:
 - `just format` — Ruff format + biome lint (fixes)
 - `just lint` — Type-check + style checks (no fixes)
 - `just prestart` — Run migrations + seed initial data
-- `just test` — Backend unit tests with coverage report
+- `just test-local` — Backend tests with coverage against a throwaway pgvector container (needs Docker)
 - `just generate-client` — Generate OpenAPI client + lint
-- `just test-compose` — Full Docker Compose test (build, start, test, cleanup)
 - `just check` — All quality gates (lint + format + test)
 
 ## Workspace Structure
@@ -137,23 +138,27 @@ backend/
     api/              # FastAPI routers, dependency injection
       routes/         # Grouped endpoints (users, items, login, etc.)
     core/             # Config, auth, security constants
+    ingestion/        # PDF parsing, chunking, embedder, documents (models, crud, router)
+    retrieval/        # Semantic search (schemas, similarity query, router)
     models.py         # SQLModel entities + Pydantic schemas
     crud.py           # Database operations
     utils.py          # Helpers (password, email, etc.)
     main.py           # FastAPI app initialization
     initial_data.py   # Seed data
-  alembic/            # Database migrations
+    alembic/          # Database migrations
   tests/
-    unit/             # Domain + CRUD tests
-    integration/      # API + adapter tests
-    conftest.py       # Fixtures
-    utils/            # Test helpers
+    api/              # Route tests
+    crud/             # CRUD tests
+    ingestion/        # Parser and embedder tests
+    retrieval/        # Search API tests
+    conftest.py       # Fixtures, throwaway test database
+    utils/            # Test helpers (pdf, embedder fakes, database)
   pyproject.toml      # Backend dependencies
   Dockerfile          # Monolith image (multi-stage: builds frontend, then backend)
 
 frontend/
   src/
-    client/           # Generated OpenAPI client (not committed)
+    client/           # Generated OpenAPI client (committed; the pre-commit hook regenerates it)
     components/       # React components (shadcn/ui in ui/)
     hooks/            # Custom hooks
     lib/              # Utilities
@@ -185,12 +190,13 @@ Root:
   deployment-docker-compose.md  # Self-hosted deployment
 ```
 
-## Next Steps (Planned, Not Yet Started)
+## Next Steps
 
-1. **Auth review & extension:** Read auth module end-to-end, then design + build role/permission-based authz.
-2. **ADR process:** Start `docs/adr/` directory for significant design decisions (auth design, ingestion strategy, etc.). Each ADR gets a **"When I would change this"** section — no reversal condition = advertisement, not a decision.
-3. **Skills map:** Create `docs/skills-map.md` to track capability coverage honestly (Covered/Partial/Planned/Deferred/Skipped).
-4. **RAG/ingestion domain:** After auth is solid, build as internal backend packages (no separate services yet).
+Phases 1-3 are shipped (see `docs/roadmap.md`); ADRs live in `docs/adr/`, the capability ledger in `docs/skills-map.md`.
+
+1. **Evaluation set:** question-to-expected-page pairs plus a Recall@k script, so retrieval changes are measured.
+2. **Keyword leg (hybrid search):** tried and not adopted (ADR-0006); search stays vector-only. Revisit with a larger evaluation set or a rarity-aware ranker.
+3. **Phase 4 - agentic review:** LLM answers over retrieved passages with page citations.
 
 ## Key Invariants
 

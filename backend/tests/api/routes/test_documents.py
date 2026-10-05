@@ -8,9 +8,8 @@ from sqlmodel import Session, select
 
 from app.core.config import settings
 from app.ingestion import router as documents_router
-from app.ingestion.embedder import EMBEDDING_DIMENSIONS
+from app.ingestion.embedder import EMBEDDING_DIMENSIONS, get_embedder
 from app.ingestion.models import DocumentChunk
-from app.ingestion.router import get_embedder
 from app.main import app
 from tests.utils.pdf import make_pdf_bytes
 
@@ -158,7 +157,7 @@ def test_delete_document_removes_its_chunks(
     assert remaining == []
 
 
-def test_read_other_users_document_returns_403(
+def test_read_other_users_document_returns_404(
     client: TestClient,
     normal_user_token_headers: dict[str, str],
     superuser_token_headers: dict[str, str],
@@ -170,4 +169,33 @@ def test_read_other_users_document_returns_403(
         headers=normal_user_token_headers,
     )
 
-    assert r.status_code == 403
+    assert r.status_code == 404
+    assert r.json()["detail"] == "Document not found"
+
+
+def test_delete_other_users_document_returns_404_and_keeps_it(
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    superuser_token_headers: dict[str, str],
+) -> None:
+    doc = _upload(client, superuser_token_headers, make_pdf_bytes(["admin"])).json()
+    url = f"{settings.API_V1_STR}/documents/{doc['id']}"
+
+    r = client.delete(url, headers=normal_user_token_headers)
+
+    assert r.status_code == 404
+    assert client.get(url, headers=superuser_token_headers).status_code == 200
+
+
+def test_superuser_can_read_another_users_document(
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    superuser_token_headers: dict[str, str],
+) -> None:
+    doc = _upload(client, normal_user_token_headers, make_pdf_bytes(["mine"])).json()
+
+    r = client.get(
+        f"{settings.API_V1_STR}/documents/{doc['id']}", headers=superuser_token_headers
+    )
+
+    assert r.status_code == 200
