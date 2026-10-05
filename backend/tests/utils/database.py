@@ -3,7 +3,7 @@ from pathlib import Path
 from alembic import command
 from alembic.config import Config
 from pydantic import PostgresDsn, TypeAdapter
-from testcontainers.postgres import PostgresContainer
+from testcontainers.community.postgres import PostgresContainer
 
 from app.core.config import settings
 
