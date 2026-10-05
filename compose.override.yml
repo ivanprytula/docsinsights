@@ -59,6 +59,9 @@ services:
             - ./frontend/dist
             - ./frontend/blob-report
             - ./frontend/test-results
+    # Measured peak while embedding a 297-chunk PDF at batch 32 was ~0.6 GB; the rest is headroom.
+    mem_limit: 2g
+
     # TODO: remove once coverage is done locally
     volumes:
       - ./backend/htmlcov:/app/backend/htmlcov
