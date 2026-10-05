@@ -150,9 +150,37 @@ query prefix: it changed no rankings in a check on real chunks (ADR-0005).
 
 ---
 
+## Phase 4 - Agentic review (first slice)
+
+**Tag:** Product, and Skills-practice (structured LLM output, grounding).
+
+**Problem:** `/answer` returns free text. A review needs a per-requirement judgment a client can act on, with evidence it can trust.
+
+**Decision:** `POST /documents/{id}/review` takes a list of requirements. Each one is retrieved against the document, then Claude returns a schema-constrained verdict (`satisfied`, `not_satisfied`, `not_found`) with a rationale and passage citations. Verdicts without a real citation are downgraded ([ADR-0007](./adr/0007-review-verdicts-must-cite-real-passages.md)).
+
+**Shipped:**
+
+- `POST /documents/{document_id}/review` with 1-20 `requirements` and optional `limit`; returns one finding per requirement with verdict, rationale and page-cited sources
+- `app.agentic_review`: `ReviewVerdict` schema, `Reviewer` protocol with a Claude implementation (`messages.parse`), and the grounding rules in `review.py`
+- Same 404 for missing or foreign documents, 503 without an API key, 502 on model failure
+- `python -m evals.review` from `backend/`: 18 labeled requirements over GDPR and the AI Act; first run scored 18/18 verdicts, with a labeled evidence page cited on 11 of 14 (the other 3 cited unlabeled pages, likely incomplete labels)
+- Live check on the GDPR PDF: "breaches notified within 72 hours" returned `satisfied` citing Article 33 (page 52); "data is sold to third parties" returned `not_found` with no sources
+
+**Known limits (not shipped):**
+
+- Single turn per requirement: no multi-turn or tool-using agent, no critique loop
+- Requirements are supplied by the caller; no built-in checklists
+- Sequential model calls in one request; one failure fails the whole review
+- The 18-requirement set is easy (no borderline cases), so 18/18 is a smoke test, not a quality claim; downgrade rate not tracked
+- No frontend screen; API-only
+
+**ADRs:** [ADR-0007: Review verdicts must cite real passages](./adr/0007-review-verdicts-must-cite-real-passages.md).
+
+---
+
 ## Not yet started
 
-- **Phase 4 (agentic review)** — multi-turn LLM interaction, structured output.
+- **Phase 4, remainder** — multi-turn or tool-using review, built-in checklists, a verdict evaluation set.
 - **Phase 5+ (cloud deploy, scaling)** — see README; decisions pending.
 
 ---
