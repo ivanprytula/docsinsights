@@ -8,6 +8,7 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlmodel import Session
 
+from app.agentic_review.reviewer import Reviewer, get_reviewer
 from app.core import security
 from app.core.config import settings
 from app.core.db import engine
@@ -38,6 +39,16 @@ def require_answerer() -> Answerer:
 
 
 AnswererDep = Annotated[Answerer, Depends(require_answerer)]
+
+
+def require_reviewer() -> Reviewer:
+    """Return the reviewer, or 503 when no Anthropic key is configured."""
+    if settings.ANTHROPIC_API_KEY is None:
+        raise HTTPException(status_code=503, detail="Reviews are not available")
+    return get_reviewer()
+
+
+ReviewerDep = Annotated[Reviewer, Depends(require_reviewer)]
 
 
 def get_current_user(session: SessionDep, token: TokenDep) -> User:

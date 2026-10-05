@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["search"])
 
 
-def _find_passages(
+def find_passages(
     *,
     session: Session,
     user: User,
@@ -56,7 +56,7 @@ def search_documents(
     body: SearchRequest,
 ) -> SearchResults:
     """Find passages closest to a query in the current user's documents (or one of them)."""
-    hits = _find_passages(
+    hits = find_passages(
         session=session,
         user=current_user,
         embedder=embedder,
@@ -77,7 +77,7 @@ def answer_question(
     body: AnswerRequest,
 ) -> Answer:
     """Answer a question from the user's own passages, citing them as [n] in `sources` order."""
-    hits = _find_passages(
+    hits = find_passages(
         session=session,
         user=current_user,
         embedder=embedder,
