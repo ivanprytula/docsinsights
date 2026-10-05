@@ -64,6 +64,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Variable not set}@db:5432/${POSTGRES_DB:?Variable not set}
       SENTRY_DSN: ${SENTRY_DSN:-}
       FASTEMBED_CACHE_PATH: /app/.cache/fastembed
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
 
     volumes:
       - app-fastembed-cache:/app/.cache/fastembed

@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.core.db import engine
 from app.ingestion.embedder import Embedder, get_embedder
 from app.models import TokenPayload, User
+from app.retrieval.answerer import Answerer, get_answerer
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
@@ -27,6 +28,16 @@ def get_db() -> Generator[Session]:
 SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 EmbedderDep = Annotated[Embedder, Depends(get_embedder)]
+
+
+def require_answerer() -> Answerer:
+    """Return the answerer, or 503 when no Anthropic key is configured."""
+    if settings.ANTHROPIC_API_KEY is None:
+        raise HTTPException(status_code=503, detail="Answers are not available")
+    return get_answerer()
+
+
+AnswererDep = Annotated[Answerer, Depends(require_answerer)]
 
 
 def get_current_user(session: SessionDep, token: TokenDep) -> User:
