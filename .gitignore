@@ -9,3 +9,9 @@ backend/app/frontend/
 
 .env
 .local
+
+# Retrieval evaluation corpus: downloaded from EUR-Lex, not stored in the repo
+backend/evals/corpus/
+
+# Saved evaluation runs: local comparison artifacts
+backend/evals/results/
