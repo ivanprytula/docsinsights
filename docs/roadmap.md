@@ -40,7 +40,7 @@ side effect.
 Uploading and organizing documents requires knowing who owns what.
 
 **Decision:** implement email/password authentication with stateless JWT tokens (access
-+ refresh), session persistence, and role field (schema-only) as foundation for Phase 2
+& refresh), session persistence, and role field (schema-only) as foundation for Phase 2
 authorization. Lean on industry-standard patterns (Argon2+bcrypt hashing via `pwdlib`,
 refresh-token rotation) rather than custom security.
 
@@ -106,19 +106,47 @@ query prefix: it changed no rankings in a check on real chunks (ADR-0005).
 - Owner scoping inside the SQL query, so another user's passages never enter the result set
 - Whitespace collapsed at chunking, so returned passages are readable (pypdf can emit one word per line)
 - `GET` and `DELETE /documents/{id}` return 404 instead of 403 for documents the caller cannot see
+- Ownership check and similarity query shared with `POST /answer` (an LLM answer over the top passages, not yet a roadmap phase), so both return the same 404 for foreign documents
 - Checked on real data: "aws" and a paraphrase ("do I need to know Amazon Web Services?") both rank the passage containing the AWS requirement first
 
 **Known limits (not shipped):**
 
-- No keyword leg: acronym and exact-term queries rank weakly, and the right passage can land second
+- No keyword leg in use: acronym and exact-term queries rank weakly. A full-text leg was built, measured and removed because it did not beat vector-only ([ADR-0006](./adr/0006-keyword-leg-tried-not-adopted.md))
 - No score threshold: scores are compressed (0.46-0.64 in the check), so only ordering is meaningful and weak matches still return
-- No vector index (sequential scan), no reranker, no LLM
-- No evaluation set: retrieval quality is judged by hand on a few documents
+- No vector index (sequential scan) and no reranker
+- Quality is measured on 75 questions only; see [Retrieval evaluation](#retrieval-evaluation) for the baseline
 - No frontend screen for upload or search; the feature is API-only
 
 **ADRs:** [ADR-0002: Search endpoint, `POST` now and `QUERY` later](./adr/0002-rag-stack-and-retrieval-design.md), [ADR-0003: Modulith seam](./adr/0003-modulith-package-seam.md), [ADR-0004: 404 for foreign documents](./adr/0004-auth-refresh-tokens-and-roles.md), [ADR-0005: Embedder ownership and pgvector](./adr/0005-embedder-ownership-and-pgvector-storage.md).
 
 **Architecture:** [C4 architecture](./c4-architecture.md) has the component view and an end-to-end walkthrough.
+
+---
+
+## Retrieval evaluation
+
+**Tag:** Product, and Skills-practice (measuring a RAG pipeline). Retrieval changes need a number, not a hand check.
+
+**Problem:** Phase 3 quality was judged by eye on a few documents, so no change (keyword leg, threshold, index) could be shown to help or hurt.
+
+**Decision:** a golden set of questions, each labeled with the document and PDF pages that answer it, run through the real ingestion and search code against a throwaway pgvector container. Metrics are Recall@1/3/5 and MRR, over two public EU regulations (GDPR, AI Act). The PDFs stay out of the repo (EUR-Lex reuse terms); the README says where to download them. Labels come from the PDF headings, not from search results, so the set does not bend toward the current ranking.
+
+**Shipped:**
+
+- `python -m evals.retrieval` from `backend/`: ingests the corpus, prints the metrics and the top hits for every question that missed rank 1
+- `evals/metrics.py` (`recall_at_k`, `mean_reciprocal_rank`) and `evals/questions.json` (75 questions: 28 original, 47 added with operative-article labels only)
+- Tests in `tests/evals/` using a fake embedder, so they need no model download
+- Baseline, vector-only (786 chunks, 75 questions): Recall@1 0.33, Recall@3 0.52, Recall@5 0.65, MRR 0.45. The 28 original questions score 0.50 / 0.64 / 0.71 / 0.58; the 47 added ones score lower partly because their labels exclude recitals (see README)
+- Bootstrap intervals in the report and each run saved as JSON under `evals/results/`
+- A keyword leg was measured against the same set (Recall@1 0.32, Recall@5 0.64, MRR 0.46) and removed; search stays vector-only ([ADR-0006](./adr/0006-keyword-leg-tried-not-adopted.md))
+
+**Known limits (not shipped):**
+
+- 75 questions: one question moves Recall@1 by 1.3 points; the two label policies are not directly comparable (README)
+- Not in CI: the run needs Docker, the corpus download and an embedding model
+- Page-level labels only; no passage-level relevance
+
+**Rules:** [README § Retrieval evaluation](../README.md#retrieval-evaluation)
 
 ---
 

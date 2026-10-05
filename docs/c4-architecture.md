@@ -131,15 +131,18 @@ Mermaid flowchart, not strict C4 notation, so it renders on GitHub without plugi
 | Config, DB engine | `app.core.config`, `app.core.db` | Settings from environment, SQLModel engine, first-superuser seed |
 | Documents router | `app.ingestion.router` | Upload (20MB cap), list, get, delete; owner-scoped; maps parse failures to 422 |
 | PDF parser and chunker | `app.ingestion.document_parser` | pypdf text extraction; 250-word windows with 50-word overlap; whitespace collapsed; typed errors for encrypted or unreadable PDFs |
-| Embedder | `app.ingestion.embedder` | `Embedder` protocol, fastembed implementation, dimensions read from the model registry, cached per process |
+| Embedder | `app.ingestion.embedder` | `Embedder` protocol, fastembed implementation, dimensions read from the model registry, cached per process, embeds in batches of 32 to bound memory |
 | Document models, CRUD | `app.ingestion.models`, `app.ingestion.crud` | `Document` and `DocumentChunk` (with `vector(384)`), save document and chunks in one transaction |
 | Search router | `app.retrieval.router` | `POST /search`: embed the query, return top hits for the current user, optionally limited to one `document_id` (404 if it is missing or not the caller's) |
 | Similarity search | `app.retrieval.search` | Cosine-distance query over the owner's chunks, joined to filenames; score is `1 - distance` |
+| Answer endpoint | `app.retrieval.router` | `POST /answer`: same search and 404 rules as `/search`, then the passages go to the answerer; returns the answer plus numbered sources matching its `[n]` citations. 503 without an API key, 502 if the model call fails |
+| Answerer | `app.retrieval.answerer` | `Answerer` protocol and a Claude implementation; passages are escaped and numbered, the system prompt allows only cited, passage-based answers and treats passage text as untrusted |
 
 ## End-to-end walkthrough: PDF in, passages out
 
-The whole RAG pipeline so far is **retrieval only**. There is no LLM, reranker or keyword
-leg yet; Phase 4 adds an LLM on top of what `POST /search` returns.
+The walkthrough below is the **retrieval** half: `POST /search` returns passages and stops.
+`POST /answer` runs the same search, then sends the top passages to Claude for a cited answer
+(single-shot; no reranker, no keyword leg).
 
 ```mermaid
 sequenceDiagram
@@ -205,11 +208,11 @@ Example: a 2-page job posting uploaded as `Data Engineer - Remote - Develocraft.
 
 | Not done | Consequence you will see |
 | --- | --- |
-| No keyword matching | Acronym or exact-term queries rank weakly; "AWS cloud experience" can rank a "cloud-native" passage above the AWS one |
+| No keyword matching | Acronym or exact-term queries rank weakly; "AWS cloud experience" can rank a "cloud-native" passage above the AWS one. A full-text leg was tried and removed because it did not beat vector-only on the evaluation set ([ADR-0006](./adr/0006-keyword-leg-tried-not-adopted.md)) |
 | No score threshold | Irrelevant chunks still return, with scores only slightly below good ones (0.59 vs 0.62) |
 | No vector index | Every search scans all of the user's chunks; fine for thousands, not millions |
 | No reranker | Order is raw vector distance |
-| No LLM | The API returns passages; nothing reads or answers from them |
+| No LLM in `/search` | `/search` returns passages only; `POST /answer` is the endpoint that reads them and answers |
 
 ### When a result looks wrong, check in this order
 
@@ -217,7 +220,7 @@ Example: a 2-page job posting uploaded as `Data Engineer - Remote - Develocraft.
 | --- | --- |
 | Passage text is unreadable or cut oddly | 2-4: extraction or chunking (re-upload after fixing; old rows keep old text) |
 | A fact is on the page but never found | 4-5: it sits past a truncation point, or a chunk blends too many topics |
-| Right passage ranks second or third | 8-9: vector-only ranking; the case for hybrid search |
+| Right passage ranks second or third | 8-9: vector-only ranking; a keyword leg did not fix it ([ADR-0006](./adr/0006-keyword-leg-tried-not-adopted.md)) |
 | Nothing returned | 6: no chunks stored for this user, or the query is for the wrong account |
 
 ## Dependency rules
@@ -234,9 +237,9 @@ Example: a 2-page job posting uploaded as `Data Engineer - Remote - Develocraft.
 | Account code is flat (`app.models`, `app.crud`), not a domain package | Inherited from the template; auth was built first | Roles and permissions work (ADR-0004 follow-up) |
 | Embedding runs inside the upload request | Simplest thing that works at MVP size | Large or concurrent uploads (ADR-0005 triggers) |
 | Search is `POST` although it only reads | Keeps query text out of URLs and logs; `QUERY` is not usable on this stack yet ([ADR-0002](./adr/0002-rag-stack-and-retrieval-design.md)) | FastAPI and the client generator support `QUERY` |
-| Search is vector-only, unindexed | Corpus is tiny; hybrid and HNSW are Phase 3+ | Acronym queries rank poorly or latency grows |
+| Search is vector-only, unindexed | Corpus is tiny; a keyword leg was tried and dropped ([ADR-0006](./adr/0006-keyword-leg-tried-not-adopted.md)), HNSW is later | Latency grows, or a larger evaluation set shows a variant that wins |
 
 ## Not built yet
 
-`agentic_review` (LLM Q&A with citations), `authoring`, a background worker for embedding,
-a keyword (BM25) leg for hybrid search.
+`agentic_review` (multi-turn review beyond the single-shot `POST /answer`), `authoring`, a
+background worker for embedding.

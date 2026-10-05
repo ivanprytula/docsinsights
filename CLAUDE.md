@@ -104,7 +104,7 @@ uv run alembic upgrade head
 
 ## Environment & Configuration
 
-- `.env` — Local development defaults (DB creds, API keys, etc.). Tracked in git for reference; secrets overridden at deploy time.
+- `.env` — Local development defaults (DB creds, API keys, etc.). Gitignored, never committed; secrets overridden at deploy time.
 - `compose.yml` — Shared Docker Compose config (db, mailpit, backend, frontend ports).
 - `compose.override.yml` — Local dev overrides (volume mounts, hot-reload).
 - `compose.deploy.yml` — Production overrides (HTTPS, certs via Traefik).
@@ -195,7 +195,7 @@ Root:
 Phases 1-3 are shipped (see `docs/roadmap.md`); ADRs live in `docs/adr/`, the capability ledger in `docs/skills-map.md`.
 
 1. **Evaluation set:** question-to-expected-page pairs plus a Recall@k script, so retrieval changes are measured.
-2. **Keyword leg (hybrid search):** Postgres full-text search merged with vector ranking; judge it against the evaluation set.
+2. **Keyword leg (hybrid search):** tried and not adopted (ADR-0006); search stays vector-only. Revisit with a larger evaluation set or a rarity-aware ranker.
 3. **Phase 4 - agentic review:** LLM answers over retrieved passages with page citations.
 
 ## Key Invariants
